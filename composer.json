@@ -1,0 +1,15 @@
+{
+    "name": "mlueer/php-db",
+    "description": "php 7 database abstraction framework",
+    "type": "library",
+    "require": {
+        "ext-PDO": "^7.0"
+    },
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Mathias Lüer",
+            "email": "mathias.luer@gmail.com"
+        }
+    ]
+}
