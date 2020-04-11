@@ -3,10 +3,19 @@ services:
   php:
     build:
       context: './docker/php/'
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+        PHP_EXTRA_CONFIG_FILE: ${PHP_EXTRA_CONFIG_FILE}
+        XDEBUG_PORT: ${XDEBUG_PORT}
+        UID: ${PHP_UID}
+        GID: ${PHP_GID}
+        COMPOSER_SSH_PUB_KEY: ${COMPOSER_SSH_PUB_KEY}
+        COMPOSER_SSH_PRIV_KEY: ${COMPOSER_SSH_PRIV_KEY}
     networks:
       - backend
     volumes:
-      - ./src:/var/www/html/
+      - .:/var/www/html/
+      - ${SYS_FILES}:/var/sysfiles
   mysql:
     image: mysql:5.7
     command: --default-authentication-plugin=mysql_native_password
@@ -14,14 +23,17 @@ services:
     networks:
       - backend
     environment:
-      - MYSQL_ROOT_PASSWORD=ma49df
-      - MYSQL_DATABASE=mydb
-      - MYSQL_USER=admin
-      - MYSQL_PASSWORD=ma49df
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
     volumes:
-      - ./volumes/mysql:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
 
 
 networks:
   backend:
     driver: bridge
+
+volumes:
+  mysql_data:
