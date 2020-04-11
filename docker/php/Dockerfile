@@ -1,7 +1,7 @@
 ARG PHP_VERSION
 FROM php:${PHP_VERSION}-fpm
 
-LABEL maintainer="Sven Schicketanz <s.schicketanz@pyrexx.com>"
+LABEL maintainer="Mathias Lüer <mathias.luer@gmail.com>"
 
 ARG UID
 ARG GID
@@ -17,10 +17,12 @@ RUN apt-get update && apt-get install -y \
     apt-utils git unzip
 
 # --- sockets Extension -------------------------------------------------------------
-RUN docker-php-ext-install -j$(($(nproc)-1)) sockets
+RUN apt-get update \
+    && docker-php-ext-install -j$(($(nproc)-1)) sockets
 
 # --- zip Extension ------------------------------------------------------------
-RUN apt-get install -y zlib1g-dev libzip-dev \
+RUN apt-get update \
+    && apt-get install -y zlib1g-dev libzip-dev \
     && docker-php-ext-install -j$(($(nproc)-1)) zip
 
 # --- soap Extension ------------------------------------------------------------
@@ -33,11 +35,13 @@ RUN apt-get update \
     && docker-php-ext-install -j$(($(nproc)-1)) pdo_mysql
 
 # --- xdebug Extension ---------------------------------------------------------
-RUN pecl install xdebug \
+RUN apt-get update \
+    && pecl install xdebug \
     && docker-php-ext-enable xdebug
 
 # --- install locales ----------------------------------------------------------
-RUN apt-get install -y locales \
+RUN apt-get update \
+    && apt-get install -y locales \
 	&& localedef -i en_GB -c -f UTF-8 -A /usr/share/locale/locale.alias en_GB \
 	&& localedef -i de_DE -c -f UTF-8 -A /usr/share/locale/locale.alias de_DE
 
@@ -45,9 +49,12 @@ RUN apt-get install -y locales \
 RUN rm -rf /tmp/pear \
     && rm -r /var/lib/apt/lists/*
 
-
 # --- composer -----------------------------------------------------------------
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+
+# --- copy over vdp specific settings for php ----------------------------------
+COPY ./php.ini /usr/local/etc/php/conf.d/php-db.ini
+#COPY ./${PHP_EXTRA_CONFIG_FILE} /usr/local/etc/php/conf.d/${PHP_EXTRA_CONFIG_FILE}
 
 # --- create user and group for application ------------------------------------
 RUN useradd -u${UID} -mUs /bin/bash app
